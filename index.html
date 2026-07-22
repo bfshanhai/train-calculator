@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>偃武九州积分最大化计算器</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -12,61 +14,135 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Noto Serif SC', serif;
+            background-color: #f7f4ed;
             min-height: 100vh;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
+                linear-gradient(180deg, rgba(247,244,237,1) 0%, rgba(238,234,226,1) 100%);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400'%3E%3Cpath d='M0,400 L0,320 Q150,280 300,300 T600,280 T900,310 T1200,290 L1200,400 Z' fill='%235a5a5a' opacity='0.06'/%3E%3Cpath d='M0,400 L0,350 Q200,330 400,340 T800,320 T1200,350 L1200,400 Z' fill='%234a4a4a' opacity='0.04'/%3E%3Cpath d='M500,340 L500,280 L520,280 L520,340' stroke='%234a4a4a' stroke-width='2' opacity='0.06'/%3E%3Cpath d='M550,330 L550,260 L570,260 L570,330' stroke='%234a4a4a' stroke-width='2' opacity='0.05'/%3E%3Cpath d='M600,320 L600,240 L620,240 L620,320' stroke='%234a4a4a' stroke-width='2' opacity='0.06'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: bottom center;
+            background-size: cover;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(200,200,220,0.4) 50%, transparent 70%);
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.2); }
         }
 
         .container {
             max-width: 480px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-logo {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #c0c0c8;
+            letter-spacing: 4px;
+            text-shadow: 
+                0 0 5px rgba(200,200,220,0.5),
+                0 0 10px rgba(200,200,220,0.3),
+                0 0 20px rgba(200,200,220,0.2);
+            z-index: 10;
         }
 
         .header {
             text-align: center;
-            color: white;
-            margin-bottom: 20px;
+            color: #4a4a4a;
+            margin-bottom: 24px;
+            padding-top: 40px;
         }
 
         .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            letter-spacing: 3px;
+            color: #3d3d3d;
         }
 
         .header p {
-            font-size: 14px;
-            opacity: 0.9;
+            font-size: 13px;
+            color: #8a8a8a;
+            letter-spacing: 1px;
         }
 
         .card {
-            background: white;
-            border-radius: 16px;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(85,85,85,0.12);
+            border-radius: 4px;
             padding: 20px;
             margin-bottom: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            backdrop-filter: blur(5px);
         }
 
         .card-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: #333;
+            color: #5a5a5a;
             margin-bottom: 16px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-            display: flex;
-            align-items: center;
+            border-bottom: 1px solid rgba(85,85,85,0.1);
+            letter-spacing: 2px;
         }
 
         .card-title::before {
             content: '';
-            width: 4px;
-            height: 16px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 2px;
+            display: inline-block;
+            width: 3px;
+            height: 14px;
+            background: rgba(150,150,170,0.6);
             margin-right: 10px;
+            vertical-align: middle;
         }
 
         .input-group {
@@ -79,10 +155,11 @@
 
         .input-label {
             display: block;
-            font-size: 14px;
-            color: #666;
+            font-size: 13px;
+            color: #7a7a7a;
             margin-bottom: 6px;
             font-weight: 500;
+            letter-spacing: 1px;
         }
 
         .input-wrapper {
@@ -91,68 +168,100 @@
 
         .input-wrapper input {
             width: 100%;
-            height: 48px;
-            padding: 0 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid rgba(85,85,85,0.15);
+            border-radius: 2px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #4a4a4a;
             transition: all 0.3s ease;
-            background: #fafafa;
+            background: rgba(255,255,255,0.7);
+            font-family: 'Noto Serif SC', serif;
         }
 
         .input-wrapper input:focus {
             outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: rgba(150,150,170,0.4);
+            background: rgba(255,255,255,0.9);
+            box-shadow: 0 0 0 3px rgba(200,200,220,0.15);
         }
 
         .input-wrapper input::placeholder {
-            color: #bbb;
+            color: #c0c0c0;
+            font-weight: 400;
         }
 
         .input-unit {
             position: absolute;
-            right: 16px;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 14px;
-            color: #999;
+            font-size: 13px;
+            color: #a0a0a0;
             pointer-events: none;
+            letter-spacing: 1px;
         }
 
         .btn {
             width: 100%;
-            height: 52px;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 48px;
+            border: 1px solid rgba(180,180,200,0.4);
+            border-radius: 2px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #5a5a6a;
+            background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(245,245,250,0.8) 100%);
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            font-family: 'Noto Serif SC', serif;
+            letter-spacing: 3px;
+            position: relative;
+            overflow: hidden;
             margin-top: 8px;
         }
 
-        .btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(200,200,230,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+            border-color: rgba(180,180,200,0.6);
+            box-shadow: 
+                0 0 10px rgba(200,200,220,0.3),
+                0 0 20px rgba(200,200,220,0.1);
+        }
+
+        .btn:active {
+            background: linear-gradient(180deg, rgba(245,245,250,0.8) 0%, rgba(255,255,255,0.9) 100%);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.5);
+            color: #8a8a8a;
+            font-size: 14px;
+            height: 42px;
+            margin-top: 8px;
+            letter-spacing: 2px;
         }
 
         .result-card {
-            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            background: rgba(255,255,255,0.7);
         }
 
         .result-card .card-title {
-            color: #667eea;
+            color: #5a5a6a;
         }
 
         .result-row {
@@ -160,7 +269,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px 0;
-            border-bottom: 1px solid #e8e8ff;
+            border-bottom: 1px solid rgba(85,85,85,0.08);
         }
 
         .result-row:last-child {
@@ -169,30 +278,32 @@
 
         .result-label {
             font-size: 14px;
-            color: #666;
+            color: #8a8a8a;
+            letter-spacing: 1px;
         }
 
         .result-value {
-            font-size: 16px;
-            font-weight: 700;
-            color: #333;
+            font-size: 15px;
+            font-weight: 600;
+            color: #4a4a4a;
         }
 
         .result-value.highlight {
-            color: #667eea;
-            font-size: 20px;
+            color: #6a6a7a;
+            font-size: 19px;
+            letter-spacing: 1px;
         }
 
         .training-detail {
-            margin-top: 12px;
+            margin-top: 14px;
             padding-left: 10px;
-            border-left: 3px solid #667eea;
+            border-left: 2px solid rgba(150,150,170,0.4);
         }
 
         .training-item {
             padding: 8px 0;
             font-size: 14px;
-            color: #444;
+            color: #5a5a5a;
             display: flex;
             justify-content: space-between;
         }
@@ -202,61 +313,64 @@
         }
 
         .training-count {
-            font-weight: 700;
-            color: #667eea;
+            font-weight: 600;
+            color: #6a6a7a;
         }
 
         .iron-conversion {
-            margin-top: 12px;
-            padding: 12px;
-            background: #fff8f0;
-            border-radius: 8px;
-            border-left: 4px solid #f59e0b;
+            margin-top: 14px;
+            padding: 14px;
+            background: rgba(255,248,240,0.5);
+            border-radius: 2px;
+            border-left: 3px solid rgba(200,150,100,0.4);
         }
 
         .iron-conversion-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            color: #d97706;
+            color: #9a7a5a;
             margin-bottom: 8px;
+            letter-spacing: 1px;
         }
 
         .iron-conversion-text {
-            font-size: 14px;
-            color: #6b7280;
-            line-height: 1.6;
+            font-size: 13px;
+            color: #7a7a7a;
+            line-height: 1.7;
         }
 
         .no-conversion {
-            padding: 12px;
-            background: #f0fdf4;
-            border-radius: 8px;
-            border-left: 4px solid #22c55e;
-            margin-top: 12px;
+            padding: 14px;
+            background: rgba(245,250,245,0.5);
+            border-radius: 2px;
+            border-left: 3px solid rgba(100,150,120,0.4);
+            margin-top: 14px;
         }
 
         .no-conversion-text {
-            font-size: 14px;
-            color: #16a34a;
+            font-size: 13px;
+            color: #6a8a7a;
             font-weight: 500;
+            letter-spacing: 1px;
         }
 
         .loading {
             text-align: center;
-            padding: 20px;
-            color: #667eea;
-            font-size: 16px;
+            padding: 24px;
+            color: #8a8a8a;
+            font-size: 15px;
+            letter-spacing: 2px;
         }
 
         .loading::after {
             content: '';
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #667eea;
-            border-top-color: transparent;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(150,150,170,0.4);
+            border-top-color: rgba(150,150,170,0.8);
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1.5s linear infinite;
             margin-left: 10px;
             vertical-align: middle;
         }
@@ -266,25 +380,37 @@
         }
 
         .info-box {
-            background: #fff;
-            border-radius: 12px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid rgba(85,85,85,0.08);
+            border-radius: 2px;
             padding: 16px;
-            margin-top: 16px;
-            font-size: 13px;
-            color: #888;
-            line-height: 1.8;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin-top: 20px;
+            font-size: 12px;
+            color: #9a9a9a;
+            line-height: 2;
+            letter-spacing: 0.5px;
         }
 
         .info-title {
             font-weight: 600;
-            color: #667eea;
-            margin-bottom: 8px;
+            color: #7a7a8a;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(85,85,85,0.1), transparent);
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
+    <div class="stars" id="stars"></div>
+    
     <div class="container">
+        <div class="brand-logo">群星之辉</div>
+
         <div class="header">
             <h1>偃武九州积分计算器</h1>
             <p>智能计算最优训练方案，最大化积分收益</p>
@@ -368,6 +494,7 @@
         </div>
 
         <button class="btn" onclick="calculate()">开始计算</button>
+        <button class="btn btn-secondary" onclick="resetForm()">重置数据</button>
 
         <div id="result" style="display: none;">
             <div class="card result-card">
@@ -389,6 +516,8 @@
             <div class="loading">正在计算最优方案</div>
         </div>
 
+        <div class="divider"></div>
+
         <div class="info-box">
             <div class="info-title">使用说明</div>
             <p>1. 请准确输入当前拥有的资源数量（单位：万）</p>
@@ -399,6 +528,28 @@
     </div>
 
     <script>
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 80;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                star.style.opacity = Math.random() * 0.5 + 0.2;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        createStars();
+
         const T3 = { name: 'T3', points: 16000, food: 960000, wood: 960000, stone: 720000, iron: 96000, speedup: 16*3600 + 27*60 + 56 };
         const T4 = { name: 'T4', points: 32000, food: 1920000, wood: 1920000, stone: 1440000, iron: 192000, speedup: 27*3600 + 26*60 + 34 };
         const T5 = { name: 'T5', points: 72000, food: 5040000, wood: 5040000, stone: 3840000, iron: 384000, speedup: 1*24*3600 + 19*3600 + 52*60 + 32 };
@@ -657,8 +808,9 @@
                     for (const [name, count] of Object.entries(result.bestTraining)) {
                         const itemDiv = document.createElement('div');
                         itemDiv.className = 'training-item';
+                        const displayName = name === '训马' ? name : `${name}（8000兵）`;
                         itemDiv.innerHTML = `
-                            <span class="training-name">${name}（8000兵）</span>
+                            <span class="training-name">${displayName}</span>
                             <span class="training-count">${count} 次</span>
                         `;
                         detailDiv.appendChild(itemDiv);
@@ -693,6 +845,20 @@
                     ironConversion.appendChild(noConversionDiv);
                 }
             }, 50);
+        }
+
+        function resetForm() {
+            document.getElementById('food').value = '';
+            document.getElementById('wood').value = '';
+            document.getElementById('stone').value = '';
+            document.getElementById('iron').value = '';
+            document.getElementById('boxA').value = '';
+            document.getElementById('boxB').value = '';
+            document.getElementById('boxC').value = '';
+            document.getElementById('boxD').value = '';
+            document.getElementById('speedup').value = '';
+            document.getElementById('horseTickets').value = '';
+            document.getElementById('result').style.display = 'none';
         }
     </script>
 </body>
