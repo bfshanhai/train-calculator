@@ -1,865 +1,224 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>偃武九州积分最大化计算器</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap');
+<div class="container">
+    <div class="brand-logo">群星之辉</div>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <div class="header">
+        <h1>偃武九州积分计算器</h1>
+        <p>智能计算最优训练方案，最大化积分收益</p>
+    </div>
 
-        body {
-            font-family: 'Noto Serif SC', serif;
-            background-color: #f7f4ed;
-            min-height: 100vh;
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E"),
-                linear-gradient(180deg, rgba(247,244,237,1) 0%, rgba(238,234,226,1) 100%);
-            z-index: -2;
-            pointer-events: none;
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40%;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 400'%3E%3Cpath d='M0,400 L0,320 Q150,280 300,300 T600,280 T900,310 T1200,290 L1200,400 Z' fill='%235a5a5a' opacity='0.06'/%3E%3Cpath d='M0,400 L0,350 Q200,330 400,340 T800,320 T1200,350 L1200,400 Z' fill='%234a4a4a' opacity='0.04'/%3E%3Cpath d='M500,340 L500,280 L520,280 L520,340' stroke='%234a4a4a' stroke-width='2' opacity='0.06'/%3E%3Cpath d='M550,330 L550,260 L570,260 L570,330' stroke='%234a4a4a' stroke-width='2' opacity='0.05'/%3E%3Cpath d='M600,320 L600,240 L620,240 L620,320' stroke='%234a4a4a' stroke-width='2' opacity='0.06'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: bottom center;
-            background-size: cover;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .star {
-            position: absolute;
-            background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(200,200,220,0.4) 50%, transparent 70%);
-            border-radius: 50%;
-            animation: twinkle 3s ease-in-out infinite;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.2); }
-        }
-
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .brand-logo {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #c0c0c8;
-            letter-spacing: 4px;
-            text-shadow: 
-                0 0 5px rgba(200,200,220,0.5),
-                0 0 10px rgba(200,200,220,0.3),
-                0 0 20px rgba(200,200,220,0.2);
-            z-index: 10;
-        }
-
-        .header {
-            text-align: center;
-            color: #4a4a4a;
-            margin-bottom: 24px;
-            padding-top: 40px;
-        }
-
-        .header h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            letter-spacing: 3px;
-            color: #3d3d3d;
-        }
-
-        .header p {
-            font-size: 13px;
-            color: #8a8a8a;
-            letter-spacing: 1px;
-        }
-
-        .card {
-            background: rgba(255,255,255,0.6);
-            border: 1px solid rgba(85,85,85,0.12);
-            border-radius: 4px;
-            padding: 20px;
-            margin-bottom: 16px;
-            backdrop-filter: blur(5px);
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #5a5a5a;
-            margin-bottom: 16px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(85,85,85,0.1);
-            letter-spacing: 2px;
-        }
-
-        .card-title::before {
-            content: '';
-            display: inline-block;
-            width: 3px;
-            height: 14px;
-            background: rgba(150,150,170,0.6);
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-        .input-group {
-            margin-bottom: 14px;
-        }
-
-        .input-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 13px;
-            color: #7a7a7a;
-            margin-bottom: 6px;
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-wrapper input {
-            width: 100%;
-            height: 44px;
-            padding: 0 14px;
-            border: 1px solid rgba(85,85,85,0.15);
-            border-radius: 2px;
-            font-size: 15px;
-            font-weight: 500;
-            color: #4a4a4a;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.7);
-            font-family: 'Noto Serif SC', serif;
-        }
-
-        .input-wrapper input:focus {
-            outline: none;
-            border-color: rgba(150,150,170,0.4);
-            background: rgba(255,255,255,0.9);
-            box-shadow: 0 0 0 3px rgba(200,200,220,0.15);
-        }
-
-        .input-wrapper input::placeholder {
-            color: #c0c0c0;
-            font-weight: 400;
-        }
-
-        .input-unit {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 13px;
-            color: #a0a0a0;
-            pointer-events: none;
-            letter-spacing: 1px;
-        }
-
-        .btn {
-            width: 100%;
-            height: 48px;
-            border: 1px solid rgba(180,180,200,0.4);
-            border-radius: 2px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #5a5a6a;
-            background: linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(245,245,250,0.8) 100%);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Noto Serif SC', serif;
-            letter-spacing: 3px;
-            position: relative;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(200,200,230,0.3), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn:hover {
-            border-color: rgba(180,180,200,0.6);
-            box-shadow: 
-                0 0 10px rgba(200,200,220,0.3),
-                0 0 20px rgba(200,200,220,0.1);
-        }
-
-        .btn:active {
-            background: linear-gradient(180deg, rgba(245,245,250,0.8) 0%, rgba(255,255,255,0.9) 100%);
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.5);
-            color: #8a8a8a;
-            font-size: 14px;
-            height: 42px;
-            margin-top: 8px;
-            letter-spacing: 2px;
-        }
-
-        .result-card {
-            background: rgba(255,255,255,0.7);
-        }
-
-        .result-card .card-title {
-            color: #5a5a6a;
-        }
-
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(85,85,85,0.08);
-        }
-
-        .result-row:last-child {
-            border-bottom: none;
-        }
-
-        .result-label {
-            font-size: 14px;
-            color: #8a8a8a;
-            letter-spacing: 1px;
-        }
-
-        .result-value {
-            font-size: 15px;
-            font-weight: 600;
-            color: #4a4a4a;
-        }
-
-        .result-value.highlight {
-            color: #6a6a7a;
-            font-size: 19px;
-            letter-spacing: 1px;
-        }
-
-        .training-detail {
-            margin-top: 14px;
-            padding-left: 10px;
-            border-left: 2px solid rgba(150,150,170,0.4);
-        }
-
-        .training-item {
-            padding: 8px 0;
-            font-size: 14px;
-            color: #5a5a5a;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .training-name {
-            font-weight: 500;
-        }
-
-        .training-count {
-            font-weight: 600;
-            color: #6a6a7a;
-        }
-
-        .iron-conversion {
-            margin-top: 14px;
-            padding: 14px;
-            background: rgba(255,248,240,0.5);
-            border-radius: 2px;
-            border-left: 3px solid rgba(200,150,100,0.4);
-        }
-
-        .iron-conversion-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #9a7a5a;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-        }
-
-        .iron-conversion-text {
-            font-size: 13px;
-            color: #7a7a7a;
-            line-height: 1.7;
-        }
-
-        .no-conversion {
-            padding: 14px;
-            background: rgba(245,250,245,0.5);
-            border-radius: 2px;
-            border-left: 3px solid rgba(100,150,120,0.4);
-            margin-top: 14px;
-        }
-
-        .no-conversion-text {
-            font-size: 13px;
-            color: #6a8a7a;
-            font-weight: 500;
-            letter-spacing: 1px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 24px;
-            color: #8a8a8a;
-            font-size: 15px;
-            letter-spacing: 2px;
-        }
-
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(150,150,170,0.4);
-            border-top-color: rgba(150,150,170,0.8);
-            border-radius: 50%;
-            animation: spin 1.5s linear infinite;
-            margin-left: 10px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .info-box {
-            background: rgba(255,255,255,0.5);
-            border: 1px solid rgba(85,85,85,0.08);
-            border-radius: 2px;
-            padding: 16px;
-            margin-top: 20px;
-            font-size: 12px;
-            color: #9a9a9a;
-            line-height: 2;
-            letter-spacing: 0.5px;
-        }
-
-        .info-title {
-            font-weight: 600;
-            color: #7a7a8a;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(85,85,85,0.1), transparent);
-            margin: 20px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="stars" id="stars"></div>
-    
-    <div class="container">
-        <div class="brand-logo">群星之辉</div>
-
-        <div class="header">
-            <h1>偃武九州积分计算器</h1>
-            <p>智能计算最优训练方案，最大化积分收益</p>
-        </div>
-
-        <div class="card">
-            <div class="card-title">资源数量</div>
-            <div class="input-group">
-                <label class="input-label">粮食（万）</label>
-                <div class="input-wrapper">
-                    <input type="number" id="food" placeholder="请输入粮食数量" />
-                    <span class="input-unit">万</span>
-                </div>
-            </div>
-            <div class="input-group">
-                <label class="input-label">木材（万）</label>
-                <div class="input-wrapper">
-                    <input type="number" id="wood" placeholder="请输入木材数量" />
-                    <span class="input-unit">万</span>
-                </div>
-            </div>
-            <div class="input-group">
-                <label class="input-label">石头（万）</label>
-                <div class="input-wrapper">
-                    <input type="number" id="stone" placeholder="请输入石头数量" />
-                    <span class="input-unit">万</span>
-                </div>
-            </div>
-            <div class="input-group">
-                <label class="input-label">铁矿（万）</label>
-                <div class="input-wrapper">
-                    <input type="number" id="iron" placeholder="请输入铁矿数量" />
-                    <span class="input-unit">万</span>
-                </div>
+    <div class="card">
+        <div class="card-title">资源数量</div>
+        <div class="input-group">
+            <label class="input-label">粮食（万）</label>
+            <div class="input-wrapper">
+                <input type="number" id="food" placeholder="请输入粮食数量" />
+                <span class="input-unit">万</span>
             </div>
         </div>
-
-        <div class="card">
-            <div class="card-title">宝箱数量</div>
-            <div class="input-group">
-                <label class="input-label">中品自选资源宝箱</label>
-                <div class="input-wrapper">
-                    <input type="number" id="boxA" placeholder="请输入中品自选资源宝箱数量" />
-                </div>
-            </div>
-            <div class="input-group">
-                <label class="input-label">良品自选资源宝箱</label>
-                <div class="input-wrapper">
-                    <input type="number" id="boxB" placeholder="请输入良品自选资源宝箱数量" />
-                </div>
-            </div>
-            <div class="input-group">
-                <label class="input-label">上品自选资源宝箱</label>
-                <div class="input-wrapper">
-                    <input type="number" id="boxC" placeholder="请输入上品自选资源宝箱数量" />
-                </div>
-            </div>
-            <div class="input-group">
-                <label class="input-label">珍品自选资源宝箱</label>
-                <div class="input-wrapper">
-                    <input type="number" id="boxD" placeholder="请输入珍品自选资源宝箱数量" />
-                </div>
+        <div class="input-group">
+            <label class="input-label">木材（万）</label>
+            <div class="input-wrapper">
+                <input type="number" id="wood" placeholder="请输入木材数量" />
+                <span class="input-unit">万</span>
             </div>
         </div>
-
-        <div class="card">
-            <div class="card-title">加速与马卷</div>
-            <div class="input-group">
-                <label class="input-label">加速时间（天）</label>
-                <div class="input-wrapper">
-                    <input type="number" id="speedup" placeholder="请输入加速天数" />
-                    <span class="input-unit">天</span>
-                </div>
-            </div>
-            <div class="input-group">
-                <label class="input-label">马卷数量</label>
-                <div class="input-wrapper">
-                    <input type="number" id="horseTickets" placeholder="请输入马卷数量" />
-                </div>
+        <div class="input-group">
+            <label class="input-label">石头（万）</label>
+            <div class="input-wrapper">
+                <input type="number" id="stone" placeholder="请输入石头数量" />
+                <span class="input-unit">万</span>
             </div>
         </div>
-
-        <button class="btn" onclick="calculate()">开始计算</button>
-        <button class="btn btn-secondary" onclick="resetForm()">重置数据</button>
-
-        <div id="result" style="display: none;">
-            <div class="card result-card">
-                <div class="card-title">计算结果</div>
-                <div class="result-row">
-                    <span class="result-label">推荐训练方案</span>
-                    <span class="result-value highlight" id="bestName"></span>
-                </div>
-                <div class="result-row">
-                    <span class="result-label">最大积分</span>
-                    <span class="result-value highlight" id="bestPoints"></span>
-                </div>
-                <div id="trainingDetails"></div>
-                <div id="ironConversion"></div>
+        <div class="input-group">
+            <label class="input-label">铁矿（万）</label>
+            <div class="input-wrapper">
+                <input type="number" id="iron" placeholder="请输入铁矿数量" />
+                <span class="input-unit">万</span>
             </div>
-        </div>
-
-        <div id="loading" style="display: none;" class="card">
-            <div class="loading">正在计算最优方案</div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="info-box">
-            <div class="info-title">使用说明</div>
-            <p>1. 请准确输入当前拥有的资源数量（单位：万）</p>
-            <p>2. 输入各类宝箱数量，系统会自动分配资源</p>
-            <p>3. 铁可置换为粮食/木材/石头（1:1/1:1/0.75:1）</p>
-            <p>4. 点击计算后系统会给出最优训练方案</p>
         </div>
     </div>
 
-    <script>
-        function createStars() {
-            const starsContainer = document.getElementById('stars');
-            const starCount = 80;
+    <div class="card">
+        <div class="card-title">宝箱数量</div>
+        <div class="input-group">
+            <label class="input-label">中品自选资源宝箱</label>
+            <div class="input-wrapper">
+                <input type="number" id="boxA" placeholder="请输入中品自选资源宝箱数量" />
+            </div>
+        </div>
+        <div class="input-group">
+            <label class="input-label">良品自选资源宝箱</label>
+            <div class="input-wrapper">
+                <input type="number" id="boxB" placeholder="请输入良品自选资源宝箱数量" />
+            </div>
+        </div>
+        <div class="input-group">
+            <label class="input-label">上品自选资源宝箱</label>
+            <div class="input-wrapper">
+                <input type="number" id="boxC" placeholder="请输入上品自选资源宝箱数量" />
+            </div>
+        </div>
+        <div class="input-group">
+            <label class="input-label">珍品自选资源宝箱</label>
+            <div class="input-wrapper">
+                <input type="number" id="boxD" placeholder="请输入珍品自选资源宝箱数量" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">加速与马卷</div>
+        <div class="input-group">
+            <label class="input-label">加速时间（天）</label>
+            <div class="input-wrapper">
+                <input type="number" id="speedup" placeholder="请输入加速天数" />
+                <span class="input-unit">天</span>
+            </div>
+        </div>
+        <div class="input-group">
+            <label class="input-label">马卷数量</label>
+            <div class="input-wrapper">
+                <input type="number" id="horseTickets" placeholder="请输入马卷数量" />
+            </div>
+        </div>
+    </div>
+
+    <button class="btn" onclick="calculate()">开始计算</button>
+    <button class="btn btn-secondary" onclick="resetForm()">重置数据</button>
+
+    <div id="result" style="display: none;">
+        <div class="card result-card">
+            <div class="card-title">计算结果</div>
+            <div class="result-row">
+                <span class="result-label">推荐训练方案</span>
+                <span class="result-value highlight" id="bestName"></span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">最大积分</span>
+                <span class="result-value highlight" id="bestPoints"></span>
+            </div>
+            <div id="trainingDetails"></div>
+            <div id="ironConversion"></div>
+        </div>
+    </div>
+
+    <div id="loading" style="display: none;" class="card">
+        <div class="loading">正在计算最优方案</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="info-box">
+        <div class="info-title">使用说明</div>
+        <p>1. 请准确输入当前拥有的资源数量（单位：万）</p>
+        <p>2. 输入各类宝箱数量，系统会自动分配资源</p>
+        <p>3. 铁可置换为粮食/木材/石头（1:1/1:1/0.75:1）</p>
+        <p>4. 点击计算后系统会给出最优训练方案</p>
+    </div>
+</div>
+
+<script>
+    // 生成更密集柔和的星星
+    function createStars() {
+        const starsContainer = document.getElementById('stars');
+        const starCount = 150; // 增加星星数量
+        
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
             
-            for (let i = 0; i < starCount; i++) {
-                const star = document.createElement('div');
-                star.className = 'star';
-                
-                const size = Math.random() * 3 + 1;
-                star.style.width = `${size}px`;
-                star.style.height = `${size}px`;
-                star.style.top = `${Math.random() * 100}%`;
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.animationDelay = `${Math.random() * 3}s`;
-                star.style.opacity = Math.random() * 0.5 + 0.2;
-                
-                starsContainer.appendChild(star);
+            const size = Math.random() * 2.5 + 0.8; // 更小更柔和
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 4}s`;
+            star.style.opacity = Math.random() * 0.4 + 0.15; // 更柔和的透明度
+            
+            starsContainer.appendChild(star);
+        }
+    }
+
+    createStars();
+
+    const T3 = { name: 'T3', points: 16000, food: 960000, wood: 960000, stone: 720000, iron: 96000, speedup: 16*3600 + 27*60 + 56 };
+    const T4 = { name: 'T4', points: 32000, food: 1920000, wood: 1920000, stone: 1440000, iron: 192000, speedup: 27*3600 + 26*60 + 34 };
+    const T5 = { name: 'T5', points: 72000, food: 5040000, wood: 5040000, stone: 3840000, iron: 384000, speedup: 1*24*3600 + 19*3600 + 52*60 + 32 };
+    const HORSE = { name: '训马', points: 200000, food: 15000000, wood: 15000000, stone: 11250000, iron: 7500000, speedup: 5*24*3600 };
+
+    const BOX_A = { name: 'A', food: 10000, wood: 10000, stone: 7500, iron: 3000 };
+    const BOX_B = { name: 'B', food: 50000, wood: 50000, stone: 37500, iron: 15000 };
+    const BOX_C = { name: 'C', food: 200000, wood: 200000, stone: 150000, iron: 70000 };
+    const BOX_D = { name: 'D', food: 600000, wood: 600000, stone: 450000, iron: 240000 };
+
+    function canAllocateBoxes(neededFood, neededWood, neededStone, neededIron, aBoxes, bBoxes, cBoxes, dBoxes) {
+        if (neededFood <= 0 && neededWood <= 0 && neededStone <= 0 && neededIron <= 0) return true;
+
+        const resources = [
+            ['food', neededFood],
+            ['wood', neededWood],
+            ['stone', neededStone],
+            ['iron', neededIron]
+        ];
+
+        function* permute(arr) {
+            if (arr.length <= 1) yield arr;
+            else {
+                for (let i = 0; i < arr.length; i++) {
+                    const rest = permute(arr.slice(0, i).concat(arr.slice(i + 1)));
+                    for (let x of rest) yield [arr[i]].concat(x);
+                }
             }
         }
 
-        createStars();
+        for (const order of permute(resources)) {
+            let remA = aBoxes, remB = bBoxes, remC = cBoxes, remD = dBoxes;
+            let success = true;
 
-        const T3 = { name: 'T3', points: 16000, food: 960000, wood: 960000, stone: 720000, iron: 96000, speedup: 16*3600 + 27*60 + 56 };
-        const T4 = { name: 'T4', points: 32000, food: 1920000, wood: 1920000, stone: 1440000, iron: 192000, speedup: 27*3600 + 26*60 + 34 };
-        const T5 = { name: 'T5', points: 72000, food: 5040000, wood: 5040000, stone: 3840000, iron: 384000, speedup: 1*24*3600 + 19*3600 + 52*60 + 32 };
-        const HORSE = { name: '训马', points: 200000, food: 15000000, wood: 15000000, stone: 11250000, iron: 7500000, speedup: 5*24*3600 };
+            for (const [resourceName, needed] of order) {
+                if (needed <= 0) continue;
 
-        const BOX_A = { name: 'A', food: 10000, wood: 10000, stone: 7500, iron: 3000 };
-        const BOX_B = { name: 'B', food: 50000, wood: 50000, stone: 37500, iron: 15000 };
-        const BOX_C = { name: 'C', food: 200000, wood: 200000, stone: 150000, iron: 70000 };
-        const BOX_D = { name: 'D', food: 600000, wood: 600000, stone: 450000, iron: 240000 };
+                let remaining = needed;
 
-        function canAllocateBoxes(neededFood, neededWood, neededStone, neededIron, aBoxes, bBoxes, cBoxes, dBoxes) {
-            if (neededFood <= 0 && neededWood <= 0 && neededStone <= 0 && neededIron <= 0) return true;
+                for (const box of [BOX_D, BOX_C, BOX_B, BOX_A]) {
+                    const value = box[resourceName];
+                    if (value <= 0) continue;
 
-            const resources = [
-                ['food', neededFood],
-                ['wood', neededWood],
-                ['stone', neededStone],
-                ['iron', neededIron]
-            ];
-
-            function* permute(arr) {
-                if (arr.length <= 1) yield arr;
-                else {
-                    for (let i = 0; i < arr.length; i++) {
-                        const rest = permute(arr.slice(0, i).concat(arr.slice(i + 1)));
-                        for (let x of rest) yield [arr[i]].concat(x);
+                    let useCount;
+                    if (box.name === 'D') {
+                        useCount = Math.min(remD, Math.ceil(remaining / value));
+                        remD -= useCount;
+                    } else if (box.name === 'C') {
+                        useCount = Math.min(remC, Math.ceil(remaining / value));
+                        remC -= useCount;
+                    } else if (box.name === 'B') {
+                        useCount = Math.min(remB, Math.ceil(remaining / value));
+                        remB -= useCount;
+                    } else if (box.name === 'A') {
+                        useCount = Math.min(remA, Math.ceil(remaining / value));
+                        remA -= useCount;
                     }
+
+                    remaining -= useCount * value;
+
+                    if (remaining <= 0) break;
+                }
+
+                if (remaining > 0) {
+                    success = false;
+                    break;
                 }
             }
 
-            for (const order of permute(resources)) {
-                let remA = aBoxes, remB = bBoxes, remC = cBoxes, remD = dBoxes;
-                let success = true;
-
-                for (const [resourceName, needed] of order) {
-                    if (needed <= 0) continue;
-
-                    let remaining = needed;
-
-                    for (const box of [BOX_D, BOX_C, BOX_B, BOX_A]) {
-                        const value = box[resourceName];
-                        if (value <= 0) continue;
-
-                        let useCount;
-                        if (box.name === 'D') {
-                            useCount = Math.min(remD, Math.ceil(remaining / value));
-                            remD -= useCount;
-                        } else if (box.name === 'C') {
-                            useCount = Math.min(remC, Math.ceil(remaining / value));
-                            remC -= useCount;
-                        } else if (box.name === 'B') {
-                            useCount = Math.min(remB, Math.ceil(remaining / value));
-                            remB -= useCount;
-                        } else if (box.name === 'A') {
-                            useCount = Math.min(remA, Math.ceil(remaining / value));
-                            remA -= useCount;
-                        }
-
-                        remaining -= useCount * value;
-
-                        if (remaining <= 0) break;
-                    }
-
-                    if (remaining > 0) {
-                        success = false;
-                        break;
-                    }
-                }
-
-                if (success) return true;
-            }
-
-            return false;
+            if (success) return true;
         }
 
-        function checkFeasibility(neededFood, neededWood, neededStone, neededIron, ironSurplus, aBoxes, bBoxes, cBoxes, dBoxes) {
-            if (canAllocateBoxes(neededFood, neededWood, neededStone, neededIron, aBoxes, bBoxes, cBoxes, dBoxes)) {
-                return { feasible: true, usedIron: false, conversion: {} };
-            }
+        return false;
+    }
 
-            if (ironSurplus <= 0) {
-                return { feasible: false, usedIron: false, conversion: {} };
-            }
-
-            function* permute3(arr) {
-                if (arr.length <= 1) yield arr;
-                else {
-                    for (let i = 0; i < arr.length; i++) {
-                        const rest = permute3(arr.slice(0, i).concat(arr.slice(i + 1)));
-                        for (let x of rest) yield [arr[i]].concat(x);
-                    }
-                }
-            }
-
-            for (const order of permute3(['food', 'wood', 'stone'])) {
-                let remainingIron = ironSurplus;
-                let newNeededFood = neededFood;
-                let newNeededWood = neededWood;
-                let newNeededStone = neededStone;
-
-                const converted = {};
-
-                for (const resource of order) {
-                    if (resource === 'food') {
-                        if (newNeededFood > 0 && remainingIron > 0) {
-                            const convertAmount = Math.min(newNeededFood, remainingIron);
-                            newNeededFood -= convertAmount;
-                            remainingIron -= convertAmount;
-                            converted.food = (converted.food || 0) + convertAmount;
-                        }
-                    } else if (resource === 'wood') {
-                        if (newNeededWood > 0 && remainingIron > 0) {
-                            const convertAmount = Math.min(newNeededWood, remainingIron);
-                            newNeededWood -= convertAmount;
-                            remainingIron -= convertAmount;
-                            converted.wood = (converted.wood || 0) + convertAmount;
-                        }
-                    } else if (resource === 'stone') {
-                        if (newNeededStone > 0 && remainingIron > 0) {
-                            const ironNeeded = Math.ceil(newNeededStone * 4 / 3);
-                            const convertAmount = Math.min(ironNeeded, remainingIron);
-                            const stoneGained = Math.floor(convertAmount * 3 / 4);
-                            newNeededStone = Math.max(0, newNeededStone - stoneGained);
-                            remainingIron -= convertAmount;
-                            converted.stone = (converted.stone || 0) + stoneGained;
-                        }
-                    }
-                }
-
-                if (canAllocateBoxes(newNeededFood, newNeededWood, newNeededStone, neededIron, aBoxes, bBoxes, cBoxes, dBoxes)) {
-                    return { feasible: true, usedIron: true, conversion: converted };
-                }
-            }
-
-            return { feasible: false, usedIron: false, conversion: {} };
+    function checkFeasibility(neededFood, neededWood, neededStone, neededIron, ironSurplus, aBoxes, bBoxes, cBoxes, dBoxes) {
+        if (canAllocateBoxes(neededFood, neededWood, neededStone, neededIron, aBoxes, bBoxes, cBoxes, dBoxes)) {
+            return { feasible: true, usedIron: false, conversion: {} };
         }
 
-        function optimize(food, wood, stone, iron, aBoxes, bBoxes, cBoxes, dBoxes, speedupDays, horseTickets) {
-            const totalSpeedup = speedupDays * 24 * 3600;
-
-            let bestPoints = 0;
-            let bestTraining = {};
-            let bestName = '';
-            let bestTrainingCount = 0;
-            let bestUsedIron = false;
-            let bestIronConversion = {};
-
-            const maxHorse = horseTickets > 0 ? Math.min(horseTickets, Math.floor(totalSpeedup / HORSE.speedup)) : 0;
-
-            for (let horseCount = maxHorse; horseCount >= 0; horseCount--) {
-                const remainingSpeedup = totalSpeedup - horseCount * HORSE.speedup;
-
-                const maxT5 = Math.floor(remainingSpeedup / T5.speedup);
-                for (let t5Count = maxT5; t5Count >= 0; t5Count--) {
-                    const remainingAfterT5 = remainingSpeedup - t5Count * T5.speedup;
-
-                    const maxT4 = Math.floor(remainingAfterT5 / T4.speedup);
-                    for (let t4Count = maxT4; t4Count >= 0; t4Count--) {
-                        const remainingAfterT4 = remainingAfterT5 - t4Count * T4.speedup;
-
-                        const maxT3 = Math.floor(remainingAfterT4 / T3.speedup);
-
-                        for (let t3Count = maxT3; t3Count >= 0; t3Count--) {
-                            const totalFood = horseCount * HORSE.food + t5Count * T5.food + t4Count * T4.food + t3Count * T3.food;
-                            const totalWood = horseCount * HORSE.wood + t5Count * T5.wood + t4Count * T4.wood + t3Count * T3.wood;
-                            const totalStone = horseCount * HORSE.stone + t5Count * T5.stone + t4Count * T4.stone + t3Count * T3.stone;
-                            const totalIron = horseCount * HORSE.iron + t5Count * T5.iron + t4Count * T4.iron + t3Count * T3.iron;
-
-                            const neededFood = Math.max(0, totalFood - food);
-                            const neededWood = Math.max(0, totalWood - wood);
-                            const neededStone = Math.max(0, totalStone - stone);
-                            const neededIron = Math.max(0, totalIron - iron);
-
-                            const ironSurplus = Math.max(0, iron - totalIron);
-
-                            const { feasible, usedIron, conversion } = checkFeasibility(
-                                neededFood, neededWood, neededStone, neededIron,
-                                ironSurplus, aBoxes, bBoxes, cBoxes, dBoxes
-                            );
-
-                            if (feasible) {
-                                const totalPoints = horseCount * HORSE.points + t5Count * T5.points + t4Count * T4.points + t3Count * T3.points;
-
-                                const trainingCount = [horseCount > 0, t5Count > 0, t4Count > 0, t3Count > 0].filter(Boolean).length;
-
-                                if (totalPoints > bestPoints ||
-                                    (totalPoints === bestPoints && trainingCount < bestTrainingCount) ||
-                                    (totalPoints === bestPoints && trainingCount === bestTrainingCount && !usedIron && bestUsedIron)) {
-                                    bestPoints = totalPoints;
-                                    bestTrainingCount = trainingCount;
-                                    bestUsedIron = usedIron;
-                                    bestIronConversion = conversion;
-                                    bestTraining = {};
-                                    if (horseCount > 0) bestTraining['训马'] = horseCount;
-                                    if (t5Count > 0) bestTraining['T5'] = t5Count;
-                                    if (t4Count > 0) bestTraining['T4'] = t4Count;
-                                    if (t3Count > 0) bestTraining['T3'] = t3Count;
-
-                                    const parts = [];
-                                    if (horseCount > 0) parts.push('训马');
-                                    if (t5Count > 0) parts.push('T5');
-                                    if (t4Count > 0) parts.push('T4');
-                                    if (t3Count > 0) parts.push('T3');
-                                    bestName = parts.join('+');
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return { bestName, bestPoints, bestTraining, bestUsedIron, bestIronConversion };
-        }
-
-        function calculate() {
-            const food = parseInt(document.getElementById('food').value) || 0;
-            const wood = parseInt(document.getElementById('wood').value) || 0;
-            const stone = parseInt(document.getElementById('stone').value) || 0;
-            const iron = parseInt(document.getElementById('iron').value) || 0;
-            const aBoxes = parseInt(document.getElementById('boxA').value) || 0;
-            const bBoxes = parseInt(document.getElementById('boxB').value) || 0;
-            const cBoxes = parseInt(document.getElementById('boxC').value) || 0;
-            const dBoxes = parseInt(document.getElementById('boxD').value) || 0;
-            const speedup = parseInt(document.getElementById('speedup').value) || 0;
-            const horseTickets = parseInt(document.getElementById('horseTickets').value) || 0;
-
-            if (food === 0 && wood === 0 && stone === 0 && iron === 0) {
-                alert('请至少输入一种资源数量');
-                return;
-            }
-
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('loading').style.display = 'block';
-
-            setTimeout(() => {
-                const result = optimize(
-                    food * 10000, wood * 10000, stone * 10000, iron * 10000,
-                    aBoxes, bBoxes, cBoxes, dBoxes,
-                    speedup, horseTickets
-                );
-
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('result').style.display = 'block';
-
-                document.getElementById('bestName').textContent = result.bestName || '无';
-                document.getElementById('bestPoints').textContent = result.bestPoints.toLocaleString();
-
-                const trainingDetails = document.getElementById('trainingDetails');
-                trainingDetails.innerHTML = '';
-
-                if (Object.keys(result.bestTraining).length > 0) {
-                    const detailDiv = document.createElement('div');
-                    detailDiv.className = 'training-detail';
-
-                    for (const [name, count] of Object.entries(result.bestTraining)) {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'training-item';
-                        const displayName = name === '训马' ? name : `${name}（8000兵）`;
-                        itemDiv.innerHTML = `
-                            <span class="training-name">${displayName}</span>
-                            <span class="training-count">${count} 次</span>
-                        `;
-                        detailDiv.appendChild(itemDiv);
-                    }
-
-                    trainingDetails.appendChild(detailDiv);
-                }
-
-                const ironConversion = document.getElementById('ironConversion');
-                ironConversion.innerHTML = '';
-
-                if (result.bestUsedIron) {
-                    const resourceNames = { food: '粮食', wood: '木材', stone: '石头' };
-                    const details = [];
-                    for (const [resource, amount] of Object.entries(result.bestIronConversion)) {
-                        if (amount > 0) {
-                            details.push(`${Math.floor(amount / 10000)}万${resourceNames[resource] || resource}`);
-                        }
-                    }
-
-                    const conversionDiv = document.createElement('div');
-                    conversionDiv.className = 'iron-conversion';
-                    conversionDiv.innerHTML = `
-                        <div class="iron-conversion-title">铁置换建议</div>
-                        <div class="iron-conversion-text">需要进行铁置换，建议将铁转换为：${details.join('，')}</div>
-                    `;
-                    ironConversion.appendChild(conversionDiv);
-                } else {
-                    const noConversionDiv = document.createElement('div');
-                    noConversionDiv.className = 'no-conversion';
-                    noConversionDiv.innerHTML = '<div class="no-conversion-text">不需要进行铁置换</div>';
-                    ironConversion.appendChild(noConversionDiv);
-                }
-            }, 50);
-        }
-
-        function resetForm() {
-            document.getElementById('food').value = '';
-            document.getElementById('wood').value = '';
-            document.getElementById('stone').value = '';
-            document.getElementById('iron').value = '';
-            document.getElementById('boxA').value = '';
-            document.getElementById('boxB').value = '';
-            document.getElementById('boxC').value = '';
-            document.getElementById('boxD').value = '';
-            document.getElementById('speedup').value = '';
-            document.getElementById('horseTickets').value = '';
-            document.getElementById('result').style.display = 'none';
-        }
-    </script>
-</body>
-</html>
+        if (ironSurplus <= 0)
