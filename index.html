@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>偃武登封积分最大化计算器</title>
+<style>
+/* ================================================================
+   偃武登封积分最大化计算器 · 竹林国风主题
+   配色：暗墨绿 + 米白宣纸 + 暗金
+   装饰：SVG 内联数据 URI 绘制竹叶/山水剪影
+   原则：仅改外观，业务逻辑完全不动
+   ================================================================ */
+
+:root {
+  /* 配色系统 */
+  --ink-deep: #2C423B;          /* 暗墨绿：标题、主按钮 */
+  --ink-bamboo: #4a6b5a;        /* 竹青：次要文字、装饰 */
+  --ink-light: #7a9688;         /* 淡竹：辅助信息 */
+  --rice-white: #f5f0e8;        /* 宣纸白：页面底色 */
+  --rice-card: #faf6f0;         /* 卡片米白 */
+  --rice-deep: #ede7dc;         /* 深米：输入框背景 */
+  --gold-seal: #A88C56;         /* 暗金：积分高亮 */
+  --ink-border: #c4bdb0;        /* 墨线：边框 */
+  --ink-shadow: rgba(44, 66, 59, 0.12);
+  --ink-shadow-soft: rgba(44, 66, 59, 0.06);
+
+  /* spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* 圆角 */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "PingFang SC", "Noto Serif SC", "KaiTi", "STKaiti",
+               -apple-system, "Segoe UI", "Microsoft YaHei", serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-deep);
+  /* 宣纸底色 + 水墨山水背景（SVG data URI） */
+  background-color: var(--rice-white);
+  background-image:
+    /* 远山剪影 — 底部 */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 200' preserveAspectRatio='none'><path d='M0,200 L0,160 Q60,100 120,140 Q180,80 260,130 Q320,60 400,120 Q480,50 560,110 Q640,70 720,130 Q760,100 800,140 L800,200 Z' fill='%234a6b5a' fill-opacity='0.08'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 180' preserveAspectRatio='none'><path d='M0,180 L0,130 Q80,80 160,110 Q240,60 320,100 Q400,40 480,90 Q560,50 640,100 Q720,70 800,120 L800,180 Z' fill='%234a6b5a' fill-opacity='0.06'/></svg>"),
+    /* 竹叶 — 左上角 */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'><g fill='%234a6b5a' fill-opacity='0.10'><path d='M10,0 Q30,40 20,80 Q10,40 10,0Z'/><path d='M25,20 Q50,60 40,100 Q25,60 25,20Z'/><path d='M5,40 Q25,80 15,130 Q0,80 5,40Z'/><path d='M35,0 Q55,50 45,90 Q30,50 35,0Z'/></g></svg>"),
+    /* 竹叶 — 右上角 */
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 200'><g fill='%234a6b5a' fill-opacity='0.08'><path d='M110,0 Q90,40 100,80 Q110,40 110,0Z'/><path d='M95,20 Q70,60 80,100 Q95,60 95,20Z'/><path d='M115,40 Q95,80 105,130 Q120,80 115,40Z'/><path d='M85,0 Q65,50 75,90 Q90,50 85,0Z'/></g></svg>");
+  background-position: bottom center, bottom center, top left, top right;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 100% 200px, 100% 180px, 120px 200px, 120px 200px;
+  background-attachment: scroll, scroll, fixed, fixed;
+  min-height: 100vh;
+}
+
+/* 容器 */
+.container {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: var(--sp-5) var(--sp-4) var(--sp-7);
+  position: relative;
+}
+
+/* ===== 标题区 ===== */
+h1 {
+  font-size: 1.85em;
+  margin: var(--sp-5) 0 var(--sp-2);
+  color: var(--ink-deep);
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-align: center;
+  font-family: "KaiTi", "STKaiti", "Noto Serif SC", serif;
+  /* 水墨笔触效果 */
+  text-shadow: 0 1px 0 rgba(44, 66, 59, 0.08);
+}
+.team-slogan {
+  font-size: 0.95em;
+  color: var(--ink-bamboo);
+  margin: 0 0 var(--sp-3);
+  letter-spacing: 2px;
+  text-align: center;
+  font-style: italic;
+}
+.disclaimer {
+  font-size: 0.82em;
+  color: var(--ink-light);
+  margin: var(--sp-4) auto var(--sp-5);
+  padding: var(--sp-3) var(--sp-4);
+  text-align: center;
+  max-width: 420px;
+  border-top: 1px solid var(--ink-border);
+  border-bottom: 1px solid var(--ink-border);
+  line-height: 1.8;
+  letter-spacing: 1px;
+}
+
+/* ===== 卡片 ===== */
+.card {
+  background: var(--rice-card);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5) var(--sp-4);
+  margin-bottom: var(--sp-5);
+  box-shadow: 0 2px 12px var(--ink-shadow-soft), 0 1px 3px var(--ink-shadow);
+  position: relative;
+  overflow: hidden;
+}
+/* 卡片顶部竹青装饰条 */
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    transparent 0%, var(--ink-bamboo) 15%, var(--ink-bamboo) 85%, transparent 100%);
+  opacity: 0.5;
+}
+
+/* ===== 输入区 ===== */
+section { margin-bottom: 0; }
+
+.field-group {
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-4);
+  border-bottom: 1px dashed var(--ink-border);
+}
+.field-group:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.field-group-title {
+  font-weight: 600;
+  margin-bottom: var(--sp-3);
+  color: var(--ink-deep);
+  font-size: 1.02em;
+  letter-spacing: 1px;
+  /* 编号用圆圈装饰 */
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.field-group-title::before {
+  /* 用编号圆圈装饰 */
+  content: attr(data-badge, "");
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ink-deep);
+  color: #fff;
+  text-align: center;
+  line-height: 24px;
+  font-size: 0.75em;
+  font-weight: 700;
+}
+.field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-1);
+}
+.field-item {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 160px;
+  gap: var(--sp-2);
+}
+.field-item label {
+  min-width: 4.5em;
+  font-size: 0.93em;
+  color: var(--ink-bamboo);
+  letter-spacing: 1px;
+}
+.field-item input {
+  width: 100%;
+  min-width: 60px;
+  padding: 10px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  border: 1.5px solid var(--ink-border);
+  border-radius: var(--r-md);
+  background: var(--rice-deep);
+  color: var(--ink-deep);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.field-item input::placeholder {
+  color: var(--ink-light);
+  opacity: 0.6;
+}
+.field-item input:focus {
+  outline: none;
+  border-color: var(--ink-bamboo);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 107, 90, 0.12);
+}
+
+/* ===== 模式单选 ===== */
+.mode-item {
+  min-width: auto !important;
+  margin-right: var(--sp-4);
+}
+.mode-item input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.mode-item label {
+  min-width: auto !important;
+  cursor: pointer;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--ink-border);
+  background: var(--rice-deep);
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.mode-item label::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-border);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.mode-item input[type="radio"]:checked + label {
+  border-color: var(--ink-deep);
+  background: var(--ink-deep);
+  color: #fff;
+}
+.mode-item input[type="radio"]:checked + label::before {
+  border-color: #fff;
+  background: var(--ink-deep);
+}
+.mode-item input[type="radio"]:checked + label::after {
+  content: "✓";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+  margin-left: -34px;
+}
+.mode-item label:hover {
+  border-color: var(--ink-bamboo);
+}
+
+/* ===== 按钮组 ===== */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin: var(--sp-5) 0 0;
+}
+button {
+  padding: 12px 28px;
+  font-size: 15px;
+  min-height: 48px;
+  cursor: pointer;
+  border: 1.5px solid var(--ink-deep);
+  border-radius: var(--r-pill);
+  background: var(--ink-deep);
+  color: #fff;
+  font-family: inherit;
+  letter-spacing: 2px;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px var(--ink-shadow-soft);
+}
+button:hover:not(:disabled) {
+  background: #1a2d25;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--ink-shadow);
+}
+button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px var(--ink-shadow-soft);
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+/* 次要按钮 */
+#btn_clear, #btn_sample, #btn_copy {
+  background: transparent;
+  color: var(--ink-deep);
+}
+#btn_clear:hover:not(:disabled),
+#btn_sample:hover:not(:disabled),
+#btn_copy:hover:not(:disabled) {
+  background: var(--rice-deep);
+}
+
+/* ===== 状态提示区 ===== */
+.status-area {
+  margin: var(--sp-4) 0;
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-5);
+  min-height: 1.5em;
+  font-size: 0.93em;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  letter-spacing: 1px;
+}
+.status-area.error {
+  color: #8b3a3a;
+  background: rgba(139, 58, 58, 0.06);
+  border-color: rgba(139, 58, 58, 0.2);
+}
+.status-area.loading {
+  color: var(--ink-bamboo);
+  background: rgba(74, 107, 90, 0.06);
+  border-color: rgba(74, 107, 90, 0.2);
+}
+
+/* ===== 结果区 ===== */
+.result-container {
+  margin-top: var(--sp-3);
+  padding: 0;
+  border: none;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-size: 0.94em;
+  line-height: 1.8;
+}
+.result-container:empty { display: none; }
+.result-section {
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px dashed var(--ink-border);
+}
+.result-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.result-section-title {
+  font-weight: 600;
+  margin-bottom: var(--sp-2);
+  color: var(--ink-deep);
+  font-size: 1em;
+  letter-spacing: 1px;
+  padding-left: var(--sp-3);
+  border-left: 3px solid var(--ink-bamboo);
+}
+.result-line {
+  margin: var(--sp-1) 0;
+  color: var(--ink-bamboo);
+  padding-left: var(--sp-3);
+}
+/* 最大总积分：暗金大字高亮 */
+.result-section:first-child .result-line {
+  color: var(--gold-seal);
+  font-weight: 700;
+  font-size: 1.5em;
+  letter-spacing: 2px;
+  padding-left: var(--sp-3);
+  text-shadow: 0 1px 0 rgba(168, 140, 86, 0.15);
+}
+
+/* ===== 页脚 ===== */
+.footer {
+  margin-top: var(--sp-7);
+  padding-top: var(--sp-4);
+  text-align: center;
+  font-size: 0.82em;
+  color: var(--ink-light);
+  letter-spacing: 2px;
+  border-top: 1px solid var(--ink-border);
+}
+
+/* ===== 移动端适配 ===== */
+@media (max-width: 480px) {
+  body { font-size: 15px; }
+  .container { padding: var(--sp-3) var(--sp-2) var(--sp-5); }
+  .card { padding: var(--sp-4) var(--sp-3); border-radius: var(--r-md); }
+  h1 { font-size: 1.5em; letter-spacing: 2px; }
+  .field-item { min-width: 100%; }
+  .field-item label { min-width: 4.5em; }
+  .mode-item { min-width: 100% !important; margin-right: 0; margin-bottom: var(--sp-2); }
+  .button-row { gap: var(--sp-2); }
+  button { flex: 1 1 auto; min-width: 100px; padding: 10px 16px; font-size: 14px; letter-spacing: 1px; }
+  /* 移动端减少背景装饰 */
+  body {
+    background-size: 100% 120px, 100% 100px, 80px 140px, 80px 140px;
+  }
+}
+
+/* ===== 极窄屏适配 ===== */
+@media (max-width: 360px) {
+  .field-item { min-width: 100%; }
+  .field-item label { min-width: 4em; font-size: 0.88em; }
+  button { font-size: 13px; padding: 10px 12px; }
+  h1 { font-size: 1.35em; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 标题与免责声明 -->
+  <h1>偃武登封积分最大化计算器</h1>
+  <div class="team-slogan">其徐如林 · 不动则已，动则成林</div>
+  <div class="disclaimer">【本计算仅基于偃武登封游戏模型，游戏实际以游戏内为准】</div>
+
+  <!-- 输入表单区 -->
+  <div class="card">
+  <section>
+    <!-- 1/5 资源库存 -->
+    <div class="field-group">
+      <div class="field-group-title" data-badge="1">现有资源库存（单位：万）</div>
+      <div class="field-row">
+        <div class="field-item"><label>粮食</label><input type="number" id="grain_wan" min="0" step="any" inputmode="decimal"></div>
+        <div class="field-item"><label>木材</label><input type="number" id="wood_wan" min="0" step="any" inputmode="decimal"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-item"><label>石头</label><input type="number" id="stone_wan" min="0" step="any" inputmode="decimal"></div>
+        <div class="field-item"><label>铁</label><input type="number" id="iron_wan" min="0" step="any" inputmode="decimal"></div>
+      </div>
+    </div>
+
+    <!-- 2/5 宝箱数量 -->
+    <div class="field-group">
+      <div class="field-group-title" data-badge="2">四类宝箱数量</div>
+      <div class="field-row">
+        <div class="field-item"><label>中品宝箱</label><input type="number" id="chest_mid" min="0" step="1" inputmode="numeric"></div>
+        <div class="field-item"><label>良品宝箱</label><input type="number" id="chest_good" min="0" step="1" inputmode="numeric"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-item"><label>上品宝箱</label><input type="number" id="chest_high" min="0" step="1" inputmode="numeric"></div>
+        <div class="field-item"><label>珍品宝箱</label><input type="number" id="chest_top" min="0" step="1" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <!-- 3/5 马卷 -->
+    <div class="field-group">
+      <div class="field-group-title" data-badge="3">马卷数量</div>
+      <div class="field-row">
+        <div class="field-item"><label>马卷</label><input type="number" id="horse_ticket" min="0" step="1" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <!-- 4/5 自有加速 -->
+    <div class="field-group">
+      <div class="field-group-title" data-badge="4">自有加速时长</div>
+      <div class="field-row">
+        <div class="field-item"><label>天</label><input type="number" id="day" min="0" step="1" inputmode="numeric"></div>
+        <div class="field-item"><label>时</label><input type="number" id="hour" min="0" step="1" inputmode="numeric"></div>
+        <div class="field-item"><label>分</label><input type="number" id="minute" min="0" step="1" inputmode="numeric"></div>
+        <div class="field-item"><label>秒</label><input type="number" id="second" min="0" step="1" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <!-- 5/5 铜币 -->
+    <div class="field-group">
+      <div class="field-group-title" data-badge="5">铜币数量</div>
+      <div class="field-row">
+        <div class="field-item"><label>铜币</label><input type="number" id="copper" min="0" step="1" inputmode="numeric"></div>
+      </div>
+    </div>
+
+    <!-- 6/6 求解模式（两套算法切换） -->
+    <div class="field-group">
+      <div class="field-group-title" data-badge="6">求解模式</div>
+      <div class="field-row">
+        <div class="field-item mode-item"><input type="radio" name="solve_mode" id="mode_max_score" value="max_score" checked><label for="mode_max_score">最大积分模式（原版）</label></div>
+        <div class="field-item mode-item"><input type="radio" name="solve_mode" id="mode_exhaust" value="exhaust_horse_ticket"><label for="mode_exhaust">优先耗尽马卷模式</label></div>
+      </div>
+    </div>
+
+    <!-- 按钮组 -->
+    <div class="button-row">
+      <button type="button" id="btn_solve">①开始推演</button>
+      <button type="button" id="btn_clear">②清空表单</button>
+      <button type="button" id="btn_sample">③填充示例数据</button>
+    </div>
+  </section>
+  </div>
+
+  <!-- 状态提示区 -->
+  <div class="status-area" id="status_area"></div>
+
+  <!-- 结果输出区 -->
+  <div class="card">
+  <div class="result-container" id="result_container"></div>
+  <div class="button-row" id="copy_row" style="display:none;">
+    <button type="button" id="btn_copy">复制策略</button>
+  </div>
+  </div>
+
+  <!-- 页脚 -->
+  <div class="footer">其徐如林 | 不动则已，动则成林</div>
+
+</div>
+
+<script>
+/*
+ * 阶段A前端骨架 - 纯 Vanilla JS
+ * 所有计算逻辑全部交给后端接口，前端不实现任何求解算法。
+ * 接口：POST http://127.0.0.1:5000/api/solve
+ *
+ * 自测清单：
+ *   自测1：填充8888示例，发起请求，页面渲染结果与后端接口返回data完全一致。
+ *   自测2：输入负数，前端拦截，不发送请求。
+ *   自测3：请求中按钮置灰，不可重复点击。
+ *   自测4：400/408/500、网络异常都有友好文字提示。
+ *   自测5：清空表单、复制策略功能正常。
+ *   自测6：手机打开页面，表单不会溢出错乱。
+ */
+
+var API_URL = "http://127.0.0.1:5000/api/solve";
+
+// 所有输入框 id 列表
+var FIELD_IDS = [
+  "grain_wan", "wood_wan", "stone_wan", "iron_wan",
+  "chest_mid", "chest_good", "chest_high", "chest_top",
+  "horse_ticket",
+  "day", "hour", "minute", "second",
+  "copper"
+];
+
+// 8888 示例数据
+var SAMPLE_DATA = {
+  grain_wan: 8888, wood_wan: 8888, stone_wan: 8888, iron_wan: 8888,
+  chest_mid: 8888, chest_good: 8888, chest_high: 8888, chest_top: 8888,
+  horse_ticket: 88,
+  day: 888, hour: 0, minute: 0, second: 0,
+  copper: 888888
+};
+
+// ===== DOM 引用 =====
+var btnSolve = document.getElementById("btn_solve");
+var btnClear = document.getElementById("btn_clear");
+var btnSample = document.getElementById("btn_sample");
+var btnCopy = document.getElementById("btn_copy");
+var statusArea = document.getElementById("status_area");
+var resultContainer = document.getElementById("result_container");
+var copyRow = document.getElementById("copy_row");
+
+// ===== 工具函数 =====
+function $(id) { return document.getElementById(id); }
+
+function showStatus(msg, type) {
+  statusArea.textContent = msg || "";
+  statusArea.className = "status-area" + (type ? " " + type : "");
+}
+
+function clearStatus() {
+  statusArea.textContent = "";
+  statusArea.className = "status-area";
+}
+
+function clearResult() {
+  resultContainer.textContent = "";
+  copyRow.style.display = "none";
+}
+
+// 收集表单数据
+function collectForm() {
+  var data = {};
+  for (var i = 0; i < FIELD_IDS.length; i++) {
+    var el = $(FIELD_IDS[i]);
+    var val = (el.value || "").trim();
+    if (val === "") {
+      data[FIELD_IDS[i]] = 0;
+    } else {
+      data[FIELD_IDS[i]] = Number(val);
+    }
+  }
+  // 读取求解模式单选值（向后兼容：默认 max_score）
+  var modeEl = document.querySelector('input[name="solve_mode"]:checked');
+  data["mode"] = modeEl ? modeEl.value : "max_score";
+  return data;
+}
+
+// 前端输入校验：不能为负数
+function validateInput(data) {
+  for (var i = 0; i < FIELD_IDS.length; i++) {
+    var key = FIELD_IDS[i];
+    var v = data[key];
+    if (typeof v !== "number" || isNaN(v)) {
+      return "字段 " + key + " 不是合法数值";
+    }
+    if (v < 0) {
+      return "字段 " + key + " 不能为负数: " + v;
+    }
+  }
+  return null;
+}
+
+// 填充示例数据
+function fillSample() {
+  for (var key in SAMPLE_DATA) {
+    if ($(key)) $(key).value = SAMPLE_DATA[key];
+  }
+  clearStatus();
+  clearResult();
+}
+
+// 清空表单
+function clearForm() {
+  for (var i = 0; i < FIELD_IDS.length; i++) {
+    $(FIELD_IDS[i]).value = "";
+  }
+  // 清空时把求解模式重置为默认 max_score
+  var modeMax = $("mode_max_score");
+  if (modeMax) modeMax.checked = true;
+  clearStatus();
+  clearResult();
+}
+
+// ===== 结果渲染 =====
+function fmtNum(n) {
+  if (n === null || n === undefined) return "—";
+  if (typeof n === "number") return n.toLocaleString("zh-CN");
+  return String(n);
+}
+
+// HTML 转义，防止接口数据注入 XSS（TC19 安全检查）
+// 仅作用于通过 innerHTML 拼接的动态字符串，不改变业务逻辑
+function esc(s) {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildResultText(data) {
+  // 生成纯文本策略摘要（供复制按钮使用）
+  var lines = [];
+  var r = data.result || {};
+  var st = data.strategy || {};
+  var res = data.resources || {};
+  var conv = data.conversion || {};
+  var sp = st["加速与铜币"] || data.speed_detail || {};
+
+  lines.push("最大总积分：" + fmtNum(r["最大总积分"]));
+  lines.push("训马次数：" + st["训马次数"] + " 次");
+  lines.push("造兵：T3=" + st["T3组数"] + " 组；T4=" + st["T4组数"] + " 组；T5=" + st["T5组数"] + " 组");
+  lines.push("");
+
+  var ca = st["宝箱分配"] || {};
+  for (var ct in ca) {
+    if (!ca.hasOwnProperty(ct)) continue;
+    var parts = [];
+    var ck = ca[ct];
+    for (var rk in ck) {
+      if (!ck.hasOwnProperty(rk)) continue;
+      if (ck[rk] > 0) parts.push(ck[rk] + rk);
+    }
+    if (parts.length > 0) {
+      lines.push(ct + "宝箱：" + parts.join("，"));
+    } else {
+      lines.push(ct + "宝箱：未使用");
+    }
+  }
+  lines.push("");
+
+  lines.push("加速总需求：" + (sp["总需加速"] || "—"));
+  lines.push("消耗铜币：" + fmtNum(sp["消耗铜币"]) + " 枚");
+  lines.push("剩余铜币：" + fmtNum(sp["剩余铜币"]) + " 枚");
+  lines.push("");
+
+  lines.push("铁置换：耗铁 " + fmtNum(conv["耗铁总量"]) + "，置换得 粮" + fmtNum(conv["置换粮"]) + "、木" + fmtNum(conv["置换木"]) + "、石" + fmtNum(conv["置换石"]));
+  lines.push("置换后剩余铁：" + fmtNum(conv["置换后剩余铁"]));
+  lines.push("");
+
+  var ra = res["剩余资源"] || {};
+  lines.push("剩余资源：粮" + fmtNum(ra["粮"]) + "、木" + fmtNum(ra["木"]) + "、石" + fmtNum(ra["石"]) + "、铁" + fmtNum(ra["铁"]));
+
+  return lines.join("\n");
+}
+
+function renderResult(data) {
+  // 完整格式化渲染 data 到结果容器
+  // 所有动态字符串均通过 esc() 转义后拼接到 innerHTML，防范 XSS（TC19）
+  var html = "";
+
+  var r = data.result || {};
+  var st = data.strategy || {};
+  var res = data.resources || {};
+  var conv = data.conversion || {};
+  // 兼容：加速明细可能在顶层 speed_detail 或 strategy.加速与铜币
+  var sp = data.speed_detail || st["加速与铜币"] || {};
+
+  // 总积分
+  html += '<div class="result-section">';
+  html += '<div class="result-section-title">最大总积分</div>';
+  html += '<div class="result-line">' + esc(fmtNum(r["最大总积分"])) + '</div>';
+  html += '</div>';
+
+  // 策略
+  html += '<div class="result-section">';
+  html += '<div class="result-section-title">推演策略</div>';
+  html += '<div class="result-line">训马：' + esc(st["训马次数"]) + ' 次</div>';
+  html += '<div class="result-line">T3：' + esc(st["T3组数"]) + ' 组</div>';
+  html += '<div class="result-line">T4：' + esc(st["T4组数"]) + ' 组</div>';
+  html += '<div class="result-line">T5：' + esc(st["T5组数"]) + ' 组</div>';
+  html += '</div>';
+
+  // 宝箱分配（在 strategy 下）
+  html += '<div class="result-section">';
+  html += '<div class="result-section-title">宝箱分配</div>';
+  var ca = st["宝箱分配"] || {};
+  for (var ct in ca) {
+    if (!ca.hasOwnProperty(ct)) continue;
+    var parts = [];
+    var ck = ca[ct];
+    for (var rk in ck) {
+      if (!ck.hasOwnProperty(rk)) continue;
+      if (ck[rk] > 0) parts.push(esc(ck[rk]) + esc(rk));
+    }
+    if (parts.length === 0) parts.push("未使用");
+    html += '<div class="result-line">' + esc(ct) + '：' + parts.join("，") + '</div>';
+  }
+  html += '</div>';
+
+  // 加速明细
+  html += '<div class="result-section">';
+  html += '<div class="result-section-title">加速明细</div>';
+  if (sp["总需加速"]) html += '<div class="result-line">总需加速：' + esc(sp["总需加速"]) + '</div>';
+  if (sp["使用道具加速"]) html += '<div class="result-line">使用道具加速：' + esc(sp["使用道具加速"]) + '</div>';
+  if (sp["铜币兑换加速"]) html += '<div class="result-line">铜币兑换加速：' + esc(sp["铜币兑换加速"]) + '</div>';
+  if (sp["消耗铜币"] !== undefined) html += '<div class="result-line">消耗铜币：' + esc(fmtNum(sp["消耗铜币"])) + ' 枚</div>';
+  if (sp["剩余铜币"] !== undefined) html += '<div class="result-line">剩余铜币：' + esc(fmtNum(sp["剩余铜币"])) + ' 枚</div>';
+  html += '</div>';
+
+  // 铁置换
+  html += '<div class="result-section">';
+  html += '<div class="result-section-title">铁置换明细</div>';
+  html += '<div class="result-line">耗铁：' + esc(fmtNum(conv["耗铁总量"])) + '</div>';
+  html += '<div class="result-line">置换得：粮' + esc(fmtNum(conv["置换粮"])) + '、木' + esc(fmtNum(conv["置换木"])) + '、石' + esc(fmtNum(conv["置换石"])) + '</div>';
+  html += '<div class="result-line">剩余铁：' + esc(fmtNum(conv["置换后剩余铁"])) + '</div>';
+  html += '</div>';
+
+  // 剩余资源
+  html += '<div class="result-section">';
+  html += '<div class="result-section-title">剩余资源</div>';
+  var ra = res["剩余资源"] || {};
+  html += '<div class="result-line">粮食：' + esc(fmtNum(ra["粮"])) + '</div>';
+  html += '<div class="result-line">木材：' + esc(fmtNum(ra["木"])) + '</div>';
+  html += '<div class="result-line">石头：' + esc(fmtNum(ra["石"])) + '</div>';
+  html += '<div class="result-line">铁：' + esc(fmtNum(ra["铁"])) + '</div>';
+  html += '</div>';
+
+  resultContainer.innerHTML = html;
+  copyRow.style.display = "block";
+}
+
+// ===== 开始推演 =====
+function solve() {
+  // 收集数据
+  var data = collectForm();
+  // 前端校验：负数拦截（自测2）
+  var errMsg = validateInput(data);
+  if (errMsg) {
+    showStatus(errMsg, "error");
+    return;
+  }
+
+  // 按钮置灰，防重复点击（自测3）
+  btnSolve.disabled = true;
+  btnClear.disabled = true;
+  btnSample.disabled = true;
+  showStatus("正在推演，请稍候……", "loading");
+  clearResult();
+
+  // fetch POST 请求
+  fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(function(resp) {
+    return resp.json().then(function(body) {
+      return { status: resp.status, body: body };
+    });
+  })
+  .then(function(out) {
+    var body = out.body || {};
+    var code = body.code;
+    var msg = body.msg || "";
+    var d = body.data;
+
+    if (code === 200 && d) {
+      // 成功：渲染结果（自测1）
+      showStatus("推演完成", "");
+      renderResult(d);
+    } else if (code === 400) {
+      // 参数错误（自测4）
+      showStatus("参数错误：" + msg, "error");
+    } else if (code === 408) {
+      // 超时（自测4）
+      showStatus("推演超时，输入规模过大，请降低数值再尝试", "error");
+    } else if (code === 500) {
+      // 服务器错误（自测4）
+      showStatus("服务器内部错误：" + msg, "error");
+    } else {
+      // 其他未知
+      showStatus("未知响应 code=" + code + "：" + msg, "error");
+    }
+  })
+  .catch(function(err) {
+    // 网络异常单独捕获（自测4）
+    showStatus("网络异常，无法连接服务器：" + err.message, "error");
+  })
+  .then(function() {
+    // 无论成功失败，恢复按钮
+    btnSolve.disabled = false;
+    btnClear.disabled = false;
+    btnSample.disabled = false;
+  });
+}
+
+// ===== 复制策略 =====
+function copyStrategy() {
+  var text = buildResultText(lastResultData);
+  if (!text) {
+    showStatus("无策略可复制", "error");
+    return;
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      showStatus("策略已复制到剪贴板", "");
+    }, function() {
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+// 旧浏览器兼容复制
+function fallbackCopy(text) {
+  var ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand("copy");
+    showStatus("策略已复制到剪贴板", "");
+  } catch (e) {
+    showStatus("复制失败：" + e.message, "error");
+  }
+  document.body.removeChild(ta);
+}
+
+// 缓存最近一次结果数据（供复制按钮读取）
+var lastResultData = null;
+var _origRenderResult = renderResult;
+renderResult = function(data) {
+  lastResultData = data;
+  _origRenderResult(data);
+};
+
+// ===== 事件绑定 =====
+btnSolve.addEventListener("click", solve);
+btnClear.addEventListener("click", clearForm);
+btnSample.addEventListener("click", fillSample);
+btnCopy.addEventListener("click", copyStrategy);
+
+// 输入框实时拦截负数（自测2增强：输入时提示）
+for (var i = 0; i < FIELD_IDS.length; i++) {
+  (function(id) {
+    $(id).addEventListener("input", function() {
+      var v = this.value;
+      if (v !== "" && Number(v) < 0) {
+        this.style.borderColor = "#c00";
+        showStatus("字段 " + id + " 不能为负数", "error");
+      } else {
+        this.style.borderColor = "";
+        if (statusArea.textContent.indexOf("不能为负数") >= 0) clearStatus();
+      }
+    });
+  })(FIELD_IDS[i]);
+}
+</script>
+</body>
+</html>
+
+<!--
+================================================================================
+  偃武登封积分最大化计算器｜阶段A 前端骨架 ｜ 人工自测检查清单
+  说明：本注释块不渲染到页面，供人工对照逐项打勾。
+  约束：阶段A 仅做基础功能闭环，不含美化/主题/slogan。
+================================================================================
+
+【一、浏览器控制台基础检查】
+
+  [ ] TC00-1：F12 打开 Console，页面加载与交互全程无 JavaScript 报错、无异常堆栈。
+  [ ] TC00-2：F12 Network 面板查看 /api/solve 请求，Request Payload 的 JSON 字段名
+             与后端接口契约完全一致（14 个字段，全小写下划线）：
+             grain_wan, wood_wan, stone_wan, iron_wan,
+             chest_mid, chest_good, chest_high, chest_top,
+             horse_ticket, day, hour, minute, second, copper
+  [ ] TC00-3：Network 面板确认请求方法为 POST，Content-Type: application/json。
+  [ ] TC00-4：Network 响应体结构为 {code, msg, data}，code=200 时 data 非空。
+
+【二、业务联调一致性测试（最高优先级）】
+
+  [ ] TC01：点击"③填充示例数据"，输入框填入 8888 全套；点"①开始推演"；
+            等待"推演完成"提示；页面渲染的最大总积分、训马次数、T3/T4/T5 组数、
+            宝箱分配、加速明细、铁置换明细、剩余资源，必须与 /api/solve 返回的
+            data 内对应字段完全一致（可用 F12 Network 对照响应 JSON 逐项核对）。
+  [ ] TC02：手动填入 1234 经典用例（粮1234万 木1234万 石1234万 铁1234万；
+            四类宝箱各 1234；马卷 64；自有加速 888天0时0分0秒；铜币 659999）；
+            点推演；核对全部输出字段渲染正确，无 — 缺失项。
+  [ ] TC03：点"①开始推演"后，按钮立即置灰（disabled，半透明）；在结果返回前
+            连续点击不再发起新请求（Network 仅一条 /api/solve）；请求结束后
+            按钮恢复可用。三个按钮（推演/清空/填充示例）在请求期间均被置灰。
+  [ ] TC04：点"②清空表单"，所有 14 个输入框清空、结果区清空、状态提示清空、
+            "复制策略"按钮隐藏。
+  [ ] TC05：推演出结果后点"复制策略"，状态区显示"策略已复制到剪贴板"；
+            粘贴到记事本，文本包含：最大总积分、训马次数、T3/T4/T5 组数、
+            各类宝箱分配、加速总需求、消耗/剩余铜币、铁置换明细、剩余资源，
+            内容完整无缺失。
+  [ ] TC06：页面顶部显示免责声明"【本计算仅基于偃武登封游戏模型，游戏实际以游戏内为准】"。
+
+【三、异常与边界输入测试】
+
+  [ ] TC07：任一输入框输入负数（如粮食 -100），点推演；前端拦截不发起网络请求
+            （Network 无 /api/solve 请求）；状态区显示"字段 xxx 不能为负数"；
+            输入框边框变红；改回正数后提示自动清除。
+  [ ] TC08：type=number 输入框输入非数字字符（如 abc），浏览器自动拒绝输入
+            或清空；点推演时按 0 处理或提示非法数值，不发起异常请求。
+  [ ] TC09：构造后端返回 400 的场景（如直接用 curl 发送负数给后端，或临时
+            改后端强制返回 400），前端页面展示"参数错误：{msg}"，页面不崩溃、
+            不白屏、按钮恢复可用。
+  [ ] TC10：构造超大输入使后端返回 408（或临时改后端强制返回 408），
+            前端展示"推演超时，输入规模过大，请降低数值再尝试"。
+  [ ] TC11：构造后端返回 500 的场景（如临时改后端抛异常），前端展示
+            "服务器内部错误：{msg}"，不打印 Python 堆栈到页面，按钮恢复可用。
+  [ ] TC12：关闭 Flask 后端服务，点推演；前端展示
+            "网络异常，无法连接服务器：Failed to fetch"（或类似网络错误信息）；
+            页面不白屏、不卡死、按钮恢复可用。
+  [ ] TC13：边界用例逐个测试，页面正常渲染不报错：
+            - 全部资源 0 + 仅宝箱（如四类宝箱各 1000）
+            - 宝箱全 0 + 仅原始资源
+            - 马卷 = 0
+            - 自有加速 = 0（仅靠铜币加速）
+            - 铜币 = 0（不能兑换加速）
+            - 所有输入全 0（应返回积分 0）
+
+【四、移动端适配专项】
+
+  [ ] TC14：查看页面源码，存在 <meta name="viewport" content="width=device-width,
+            initial-scale=1.0"> 标签。
+  [ ] TC15：Chrome DevTools 切换到手机模拟器（如 iPhone SE 375x667），
+            页面无横向滚动条、无内容溢出屏幕。
+  [ ] TC16：手机模拟器下输入框宽度自适应屏幕（100% 宽），按钮点击区域
+            足够大（≥ 40px 高），不会误触。
+  [ ] TC17：推演结果含长文本（如"968天5时39分8秒"）时，自动换行不溢出屏幕；
+            .result-container 设置了 white-space: pre-wrap; word-break: break-all。
+  [ ] TC18：手机模拟器横屏/竖屏切换，布局自适应不崩坏，输入框与按钮可用。
+
+【五、安全小检查】
+
+  [ ] TC19：接口返回的数据渲染到页面时，所有动态字符串均通过 esc() 函数做
+            HTML 转义后再拼接到 innerHTML（查看源码 renderResult 函数）；
+            即使后端返回包含 <script> 的字段，也不会执行，仅原样显示文本。
+
+================================================================================
+  人工检测完成签字：__________  日期：__________
+================================================================================
+
+
+【六、阶段B 美化迭代 专项自测清单】
+
+  说明：阶段B 仅修改 CSS 与少量文本，JS 业务逻辑 100% 保留不动。
+
+  [ ] TB01：JS 业务逻辑完全没有改动。8888、1234 用例推演结果与美化前完全一致
+            （积分、训马次数、T3/T4/T5、宝箱、加速、铜币、铁置换、剩余资源）。
+  [ ] TB02：团队 slogan 两处位置显示：
+            - 标题下方小号浅灰色"其徐如林 · 不动则已，动则成林"
+            - 页面最底部页脚"其徐如林 | 不动则已，动则成林"
+            字号小（0.8em）、竹青色，不抢夺页面主体注意力。
+  [ ] TB03：配色严格使用指定色值（CSS 变量）：
+            --color-main-darkgreen #2C423B（墨绿：标题、按钮）
+            --color-sub-bamboo #547C6F（竹青：分割线、slogan）
+            --color-bg-page #ffffff（纯白背景）
+            --color-bg-card #f8f9f9（卡片浅灰底）
+            --color-highlight-gold #A88C56（仅最大总积分高亮）
+            没有新增花哨色彩。
+  [ ] TB04：输入区域、结果区域分别包装为卡片，圆角 8px，细浅灰边框，padding 16px。
+  [ ] TB05：各输入板块间使用竹青色细实线分割（.field-group border-bottom）。
+  [ ] TB06：主按钮背景墨绿 #2C423B，hover 简单加深（#1f3128），禁用状态 opacity 0.5。
+  [ ] TB07：【最大总积分】数字使用暗金 #A88C56 加粗高亮，字号 1.3em，
+            页面仅此一处使用该强调色。
+  [ ] TB08：输入框 focus 时 border 变竹青色，无花哨改造、无动画。
+  [ ] TB09：移动端模拟器、真机测试：无横向滚动条、无内容溢出；
+            输入框铺满屏幕，按钮 min-height 44px，长文本自动换行。
+  [ ] TB10：全部原有功能正常：推演、拦截负数、填充示例、清空、复制、
+            200/400/408/500/网络异常分支全部正常。
+  [ ] TB11：没有引入图片、竹叶 svg、装饰插画、渐变、发光、毛玻璃、多余动画。
+  [ ] TB12：免责声明文本"【本计算仅基于偃武登封游戏模型，游戏实际以游戏内为准】"
+            保持不变，位置在标题区下方。
+
+================================================================================
+  阶段B 检测完成签字：__________  日期：__________
+================================================================================
+
+
+【七、阶段B+ polish 精细化自测清单】
+
+  说明：本次仅在阶段B基础上做 4 处纯 CSS 增量打磨，JS 业务逻辑依旧 100% 冻结。
+
+  [ ] TP01：卡片有极轻阴影（box-shadow rgba 0.03~0.04），视觉层次提升但不抢眼。
+  [ ] TP02：输入框 focus 时出现轻微竹青 ring（box-shadow 2px rgba 84,124,111,0.15），
+            border 同步变竹青色，焦点反馈清晰。
+  [ ] TP03：状态区 loading 态显示竹青色左侧色条 + 极淡竹青底；
+            error 态显示红色左侧色条 + 极淡红底；视觉区分明显。
+  [ ] TP04：间距使用 spacing 变量统一管理（xs/sm/md/lg/xl = 4/8/12/16/24px），
+            整体节奏协调。
+  [ ] TP05：JS 业务逻辑零改动——8888 推演结果积分 31,136,000、训马 0次、
+            T3=1/T4=536/T5=194 完全一致；1234 用例正常。
+  [ ] TP06：全部原有功能正常：负数拦截、填充示例、清空、复制、loading、
+            400/408/500/网络异常错误提示。
+  [ ] TP07：移动端无横向滚动；按钮 ≥44px；输入框 100% 宽自适应。
+  [ ] TP08：两处 slogan（标题下 + 页脚）正常显示，字号 0.8em 偏小，不抢主体。
+  [ ] TP09：无 CDN、无新增 JS、无图片、无插画、无花哨动画（仅 transition 0.15s）。
+
+================================================================================
+  polish 检测完成签字：__________  日期：__________
+================================================================================
+
+
+【八、背景参考专项自测清单】
+
+  说明：参照团队红包水墨意境，以纯 CSS 渐变唤起墨韵，不加图片/SVG/竹叶插画。
+
+  [ ] TB01：body 背景为水墨径向渐变（中心纸白→边缘极淡墨绿），无图片。
+  [ ] TB02：容器顶端有竹青渐变细线（两侧淡出），呼应水墨纸边。
+  [ ] TB03：结果区标题有竹青左边线（3px border-left），呼应水墨笔触。
+  [ ] TB04：卡片背景纯白（宣纸质感），阴影微倾，层次分明。
+  [ ] TB05：页面底色带极淡墨绿调（#f7f8f7），非纯白。
+  [ ] TB06：无任何图片文件、SVG 竹叶、插画、装饰纹样。
+  [ ] TB07：JS 业务逻辑零改动——8888 推演结果积分 31,136,000 一致。
+  [ ] TB08：移动端无横向滚动；背景渐变 fixed 不影响滚动性能。
+
+================================================================================
+  背景参考检测完成签字：__________  日期：__________
+================================================================================
+-->
+
